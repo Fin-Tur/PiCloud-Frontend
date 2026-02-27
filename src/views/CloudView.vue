@@ -1,5 +1,8 @@
 <script setup>
-// ...CloudView logic and imports...
+import { ref } from 'vue'
+import FileList from '@/components/FileList.vue'
+import { useAuthStore } from '@/stores/auth.js'
+import { fetchFiles, cryptFile, deleteFile, downloadFile, getOccupiedSpace, getUsableSapce, uploadFile, pressFile } from '@/services/api.js'
 
 function toggleEncryptFile(fileId) {
   const file = findFile(fileId)

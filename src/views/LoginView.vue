@@ -16,7 +16,7 @@ const registerPassword = ref('')
 const confirmPassword = ref('')
 
 const message = ref('')
-const messageType = ref('') // 'success' or 'error'
+const messageType = ref('')
 
 function switchToRegister() {
   isLogin.value = false
@@ -29,49 +29,40 @@ function switchToLogin() {
 }
 
 async function handleLogin() {
-  try{
-      const response = await login(loginUsername.value, loginPassword.value);
-    }catch(error){
-        message.value = "An error occurred during login. Please try again.";
-        messageType.value = "error";
-        return;
+  try {
+    const response = await login(loginUsername.value, loginPassword.value)
+    if (response?.success) {
+      router.push('/cloud')
+    } else {
+      message.value = response?.message || 'Invalid username or password.'
+      messageType.value = 'error'
     }
-    if(response.success){
-         message.value = "Login successful!";
-        messageType.value = "success";
-        router.push('/cloud');
-    }else{
-        message.value = "Invalid username or password";
-        messageType.value = "error";
-    }
-   
+  } catch (error) {
+    message.value = error.message || 'An Error occured during Login.'
+    messageType.value = 'error'
+  }
 }
 
 async function handleRegister() {
-  try{
-      const response = await register(registerUsername.value, registerPassword.value);
-    }catch(error){
-        message.value = "An error occurred during registration. Please try again.";
-        messageType.value = "error";
-        return;
+  if (registerPassword.value !== confirmPassword.value) {
+    message.value = 'Passwords  are not the same.'
+    messageType.value = 'error'
+    return
+  }
+  try {
+    const response = await register(registerUsername.value, registerPassword.value)
+    if (response?.success) {
+      message.value = 'Regristration succesful. Please log in!.'
+      messageType.value = 'success'
+      switchToLogin()
+      return
     }
-
-  if(registerPassword.value !== confirmPassword.value) {
-    message.value = "Passwords do not match";
-    messageType.value = "error";
-    return;
+    message.value = response?.message || 'Registration went wrong.'
+    messageType.value = 'error'
+  } catch (error) {
+    message.value = error.message || 'An Error Occured during Registration.'
+    messageType.value = 'error'
   }
-  const response = await register(registerUsername.value, registerPassword.value);
-
-  if(response.success){
-    message.value = "Registration successful! Please log in.";
-    messageType.value = "success";
-    router.push('/login');
-    return;
-  }
-  message.value = "Registration failed. Please try again.";
-  messageType.value = "error";
-
 }
 </script>
 
