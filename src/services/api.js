@@ -76,7 +76,7 @@ export async function fetchFiles() {
 }
 
 export async function cryptFile(fileId, password) {
-    return await api_call(`files/${fileId}/encrypttion`, 'POST', { password });
+    return await api_call(`files/${fileId}/encryption`, 'POST', { password: password });
 }
 
 export async function pressFile(fileId) {
@@ -87,7 +87,7 @@ export async function deleteFile(fileId) {
     return await api_call(`files/${fileId}`, 'DELETE');
 }
 
-export async function getUsableSapce(){
+export async function getUsableSpace(){
     return await api_call('getUsableSpace');
 }
 
@@ -95,8 +95,31 @@ export async function getOccupiedSpace(){
     return await api_call('getOccupiedSpace');
 }
 
-export async function uploadFile(){}
-export async function downloadFile(){}
+export async function uploadFile(file){
+    const formData = new FormData();
+    formData.append('file', file);
+    return await api_call('files/upload', 'POST', formData);
+}
+export async function downloadFile(fileId, fileName = 'downloaded_file'){
+    const response = await fetch(`${API_BASE_URL}files/download/${fileId}`, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    
+    if (!response.ok) {
+        throw new Error(`Download failed: ${response.status}`);
+    }
+    
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
 //========= Dir API Calls =========
 
@@ -113,11 +136,11 @@ export async function createDir(dirName, password = "") {
 }
 
 export async function getFilesFromDir(dirId, password = "") {
-    return await api_call(`dirs/${dirId}/files`, {password: password});
+    return await api_call(`dirs/${dirId}/files`, 'POST', { password: password });
 }
 
 export async function moveFileToDir(fileId, dirId) {
-    return await api_call(`dirs/move/${fileId}/${dirID}`, 'POST');
+    return await api_call(`dirs/move/${fileId}/${dirId}`, 'POST');
 }
 
 

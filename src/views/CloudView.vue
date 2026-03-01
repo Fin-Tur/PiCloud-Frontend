@@ -1,36 +1,53 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import FileList from '@/components/FileList.vue'
+import FileComp from '@/components/FileComp.vue'
 import { useAuthStore } from '@/stores/auth.js'
-import { fetchFiles, cryptFile, deleteFile, downloadFile, getOccupiedSpace, getUsableSapce, uploadFile, pressFile } from '@/services/api.js'
+import { fetchFiles, cryptFile, deleteFile, downloadFile, getOccupiedSpace, getUsableSpace, uploadFile, pressFile } from '@/services/api.js'
 
-function toggleEncryptFile(fileId) {
-  const file = findFile(fileId)
-  if (!file) return
-  file.encrypted = !file.encrypted
+const authStore = useAuthStore()
+const files = ref([])
+const currentDir = ref('/cloud')
+const selectedFile = ref(null)
+const fileModalVisible = ref(false)
+
+files.value = [{
+    id: 1,
+    name: 'Example File.txt',
+    type: 'text/plain',
+    size: 1024,
+    ownerUsername: 'john_doe',
+    encrypted: false,
+    compressed: false,
+}]
+
+onMounted(async () => {
+    files.value = await fetchFiles()
+})
+
+function onSelectFile(file) {
+    selectedFile.value = file
+    fileModalVisible.value = true
 }
 
-function toggleCompressFile(fileId) {
-  const file = findFile(fileId)
-  if (!file) return
-  file.compressed = !file.compressed
+function onCloseFileModal() {
+    fileModalVisible.value = false
+    selectedFile.value = null
 }
 
-function moveFile(fileId) {
-  const file = findFile(fileId)
-  if (!file) return
-  console.info(`Move to dir clicked: ${file.name}`)
+async function onDelete(fileId) {
+    await deleteFile(fileId)
+    files.value = files.value.filter(f => f.id !== fileId)
 }
 
-function moveHomeFile(fileId) {
-  const file = findFile(fileId)
-  if (!file) return
-  currentDir.value = '/cloud'
-  console.info(`Move to home clicked: ${file.name}`)
+async function onToggleEncrypt(fileId, password) {
+    await cryptFile(fileId, password)
+    files.value = await fetchFiles()
 }
 
-function deleteFile(fileId) {
-  files.value = files.value.filter(file => file.id !== fileId)
+async function onToggleCompress(fileId) {
+    await pressFile(fileId)
+    files.value = await fetchFiles()
 }
 </script>
 
@@ -39,19 +56,25 @@ function deleteFile(fileId) {
     <div class="mx-auto w-full max-w-6xl">
       <div class="mb-6">
         <h1 class="text-3xl font-bold tracking-tight text-white">Cloud Files</h1>
-        <p class="mt-1 text-sm text-indigo-300/80">Dummy-Daten zur Vorschau der FileList</p>
       </div>
 
       <FileList
         :files="files"
-        :current-user="currentUser"
+        @select-file="onSelectFile"
+      />
+
+      <FileComp
+        :file="selectedFile"
+        :visible="fileModalVisible"
+        :current-user="authStore.user?.username ?? 'john_doe'"
         :current-dir="currentDir"
-        @download-file="downloadFile"
-        @toggle-encrypt-file="toggleEncryptFile"
-        @toggle-compress-file="toggleCompressFile"
-        @move-file="moveFile"
-        @move-home-file="moveHomeFile"
-        @delete-file="deleteFile"
+        @close="onCloseFileModal"
+        @download="downloadFile"
+        @toggle-encrypt="onToggleEncrypt"
+        @toggle-compress="onToggleCompress"
+        @move="(id) => { /* TODO: implement */ }"
+        @move-home="(id) => { /* TODO: implement */ }"
+        @delete="onDelete"
       />
     </div>
   </div>
