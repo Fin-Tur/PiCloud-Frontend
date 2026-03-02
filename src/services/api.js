@@ -72,7 +72,7 @@ export async function fetchCurrentUser() {
 //========= File API Calls =========
 
 export async function fetchFiles() {
-    return await api_call('files');
+    return await api_call('files/list', 'GET');
 }
 
 export async function cryptFile(fileId, password) {
@@ -88,11 +88,11 @@ export async function deleteFile(fileId) {
 }
 
 export async function getUsableSpace(){
-    return await api_call('getUsableSpace');
+    return await api_call('files/getUsableSpace');
 }
 
 export async function getOccupiedSpace(){
-    return await api_call('getOccupiedSpace');
+    return await api_call('files/getOccupiedSpace');
 }
 
 export async function uploadFile(file){

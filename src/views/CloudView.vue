@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import FileList from '@/components/FileList.vue'
 import FileComp from '@/components/FileComp.vue'
+import Dashboard from '@/components/Dashboard.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import { fetchFiles, cryptFile, deleteFile, downloadFile, getOccupiedSpace, getUsableSpace, uploadFile, pressFile } from '@/services/api.js'
 
@@ -53,29 +54,38 @@ async function onToggleCompress(fileId) {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-10">
-    <div class="mx-auto w-full max-w-6xl">
-      <div class="mb-6">
-        <h1 class="text-3xl font-bold tracking-tight text-white">Cloud Files</h1>
+    <!-- Mobile: stacked / Desktop: side by side -->
+    <div class="mx-auto flex w-full max-w-8xl flex-col items-center gap-2 lg:flex-row lg:items-start lg:pl-2">
+      <!-- Dashboard – links auf Desktop, oben auf Mobil -->
+      <div class="w-full ml-24 mt-24 max-w-xs shrink-0 lg:sticky lg:top-10">
+        <Dashboard :current-user="authStore.user?.username ?? 'user'" />
       </div>
+      <div class="flex-1 min-w-4 w-full lg:ml-32">
+        <div class="max-w-5xl">
+          <div class="mb-6">
+            <h1 class="text-3xl font-bold tracking-tight text-white">Cloud Files</h1>
+          </div>
 
-      <FileList
-        :files="files"
-        @select-file="onSelectFile"
-      />
-
-      <FileComp
-        :file="selectedFile"
-        :visible="fileModalVisible"
-        :current-user="authStore.user?.username ?? 'john_doe'"
-        :current-dir="currentDir"
-        @close="onCloseFileModal"
-        @download="downloadFile"
-        @toggle-encrypt="onToggleEncrypt"
-        @toggle-compress="onToggleCompress"
-        @move="(id) => { /* TODO: implement */ }"
-        @move-home="(id) => { /* TODO: implement */ }"
-        @delete="onDelete"
-      />
+          <FileList
+            :files="files"
+            @select-file="onSelectFile"
+          />
+        </div>
+      </div>
     </div>
+
+    <FileComp
+      :file="selectedFile"
+      :visible="fileModalVisible"
+      :current-user="authStore.user?.username ?? 'user'"
+      :current-dir="currentDir"
+      @close="onCloseFileModal"
+      @download="downloadFile"
+      @toggle-encrypt="onToggleEncrypt"
+      @toggle-compress="onToggleCompress"
+      @move="(id) => { /* TODO: implement */ }"
+      @move-home="(id) => { /* TODO: implement */ }"
+      @delete="onDelete"
+    />
   </div>
 </template>
