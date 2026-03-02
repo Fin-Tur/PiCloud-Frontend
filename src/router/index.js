@@ -26,7 +26,7 @@ const router = createRouter({
 
   //DEV ONLY
 
-/*router.beforeEach(async (to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
   if (!authStore.initialized) {
@@ -40,6 +40,6 @@ const router = createRouter({
   if (to.name === 'login' && authStore.isAuthenticated) {
     return { name: 'cloud' }
   }
-})*/
+})
 
 export default router

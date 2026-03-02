@@ -85,7 +85,7 @@ function onDelete() {
                 <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
                 <!-- Modal -->
-                <div class="relative w-full max-w-lg rounded-3xl border border-white/10 bg-slate-900/95 shadow-2xl backdrop-blur-xl overflow-hidden">
+                <div class="relative w-full max-w-xl rounded-3xl border border-white/10 bg-slate-900/95 shadow-2xl backdrop-blur-xl overflow-hidden">
 
                     <!-- Close Button -->
                     <button

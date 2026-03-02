@@ -95,9 +95,10 @@ export async function getOccupiedSpace(){
     return await api_call('files/getOccupiedSpace');
 }
 
-export async function uploadFile(file){
+export async function uploadFile(files){
+    console.log('Uploading files:', files);
     const formData = new FormData();
-    formData.append('file', file);
+    files.forEach(file => formData.append('files', file));
     return await api_call('files/upload', 'POST', formData);
 }
 export async function downloadFile(fileId, fileName = 'downloaded_file'){
