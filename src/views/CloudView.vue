@@ -6,9 +6,12 @@ import Dashboard from '@/components/Dashboard.vue'
 import FileUpload from '@/components/FileUpload.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import { fetchFiles, cryptFile, deleteFile, downloadFile, getOccupiedSpace, getUsableSpace, uploadFile, pressFile } from '@/services/api.js'
+import SearchBar from '@/components/SearchBar.vue'
 
 const authStore = useAuthStore()
 const files = ref([])
+const filteredFiles = ref([])
+const searchQuery = ref('')
 const currentDir = ref('/cloud')
 const selectedFile = ref(null)
 const fileModalVisible = ref(false)
@@ -25,7 +28,25 @@ files.value = [{
 
 onMounted(async () => {
     files.value = await fetchFiles()
+    filteredFiles.value = files.value
 })
+
+function filterFiles(query) {
+    searchQuery.value = query
+    if (!query) {
+        filteredFiles.value = files.value
+    } else {
+        const lowerQuery = query.toLowerCase()
+        filteredFiles.value = files.value.filter(file =>
+            file.name.toLowerCase().includes(lowerQuery) ||
+            file.type.toLowerCase().includes(lowerQuery)
+        )
+    }
+}
+
+function applyCurrentFilter() {
+    filterFiles(searchQuery.value)
+}
 
 function onSelectFile(file) {
     selectedFile.value = file
@@ -45,33 +66,35 @@ async function onDelete(fileId) {
 async function onToggleEncrypt(fileId, password) {
     await cryptFile(fileId, password)
     files.value = await fetchFiles()
+    applyCurrentFilter()
 }
 
 async function onToggleCompress(fileId) {
     await pressFile(fileId)
     files.value = await fetchFiles()
+    applyCurrentFilter()
 }
 </script>
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-10">
-    <!-- Mobile: stacked / Desktop: side by side -->
     <div class="mx-auto flex w-full max-w-8xl flex-col items-center gap-2 lg:flex-row lg:items-start lg:pl-2">
-      <!-- Dashboard – links auf Desktop, oben auf Mobil -->
-      <div class="w-full ml-24 mt-24 max-w-xs shrink-0 lg:sticky lg:top-10">
+      <div class="w-full ml-18 mt-24 max-w-xs shrink-0 lg:sticky lg:top-10">
         <Dashboard :current-user="authStore.user?.username ?? 'user'" />
       </div>
-      <div class="flex-1 min-w-4 w-full lg:ml-32 ">
+      <div class="flex-1 min-w-4 w-full lg:ml-4 ">
         <div class="max-w-5xl bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-lg p-6">
           <div class="mb-6">
             <h1 class="text-3xl font-bold tracking-tight text-white">Cloud Files</h1>
             <div class="h-px bg-white/10 my-6"></div>
           </div>
-
-          <FileUpload @file-upload="uploadFile"></FileUpload>
+          <div class="mb-6 w-full">
+            <SearchBar @search="filterFiles" :max-width="'full'"/>
+            <FileUpload @file-upload="uploadFile"></FileUpload>
+          </div>
           <div class="h-px bg-white/10 my-6"></div>
           <FileList
-            :files="files"
+            :files="filteredFiles"
             @select-file="onSelectFile"
           />
         </div>
